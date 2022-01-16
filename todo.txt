@@ -1,0 +1,4 @@
+- use go to read subreddit r/hiring every so often
+- filter results for the string '[hiring]' (case insensitive)
+- send notification emails
+- deploy on google cloud platform
