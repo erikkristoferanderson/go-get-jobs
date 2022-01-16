@@ -24,7 +24,9 @@ def check_a_subreddit(subreddit_name):
     return results_list
 
 
-def meets_conditions(submission, search_terms):
+def meets_conditions(submission, search_terms='default'):
+    if search_terms == 'default':
+        search_terms = ['[hiring]']
     time_cutoff = datetime.now() - timedelta(minutes=10, seconds=15)
     submission_title = submission.title.lower()
     submission_time = datetime.fromtimestamp(submission.created_utc)
