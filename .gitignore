@@ -1,6 +1,9 @@
 # JetBrains IDEs
 .idea
 
+#Credentials
+creds.env
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
