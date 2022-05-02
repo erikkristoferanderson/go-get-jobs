@@ -1,5 +1,7 @@
-- use python 
+- use Go
 - read subreddit r/hiring every so often
 - filter results for the string '[hiring]' (case insensitive)
 - send notification emails
 - deploy on google cloud platform
+- write how to/usage in readme
+- use sendgrid

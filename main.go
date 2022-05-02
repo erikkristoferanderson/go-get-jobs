@@ -3,12 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/vartanbeno/go-reddit/v2/reddit"
-	"net/smtp"
+	"log"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/sendgrid/sendgrid-go"
+	"github.com/sendgrid/sendgrid-go/helpers/mail"
+	"github.com/vartanbeno/go-reddit/v2/reddit"
 )
+
+var debug_disable_sendgrid bool = true
 
 func main() {
 
@@ -20,7 +25,7 @@ func main() {
 		},
 		Time: "all",
 	})
-
+	println(posts)
 	//= [post for post in posts if post.title.lower().contains('[hiring]')]
 	var filteredPosts []*reddit.Post
 
@@ -39,33 +44,35 @@ func main() {
 	}
 
 	// Sender data.
-	from := "go.get.jobs.oss@gmail.com"
-	password := os.Getenv("GMAIL_PASSWORD")
-	fmt.Println(password)
+	// from := "go.get.jobs.oss@gmail.com"
+	// password := os.Getenv("GMAIL_PASSWORD")
+	// fmt.Println(password)
 
 	// Receiver email address.
-	to := []string{
-		"go.get.jobs.oss+dev@gmail.com",
-	}
-
-	// smtp server configuration.
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
+	// to := []string{
+	// 	"go.get.jobs.oss+dev@gmail.com",
+	// }
 
 	// Message.
-	message := []byte("test message with \n" + posts_string)
+	if !debug_disable_sendgrid {
+		message_text := "test message with \n" + posts_string
 
-	// Authentication.
-	auth := smtp.PlainAuth("", from, password, smtpHost)
-
-	// Sending email.
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
-	if err != nil {
-		fmt.Println(err)
-		return
+		from := mail.NewEmail(os.Getenv("SENDGRID_FROM_NAME"), os.Getenv("SENDGRID_FROM_EMAIL"))
+		subject := "Go Get Jobs notification"
+		to := mail.NewEmail(os.Getenv("SENDGRID_TO_NAME"), os.Getenv("SENDGRID_TO_EMAIL"))
+		plainTextContent := message_text
+		htmlContent := message_text
+		message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+		sendgridclient := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+		response, err := sendgridclient.Send(message)
+		if err != nil {
+			log.Println(err)
+		} else {
+			fmt.Println(response.StatusCode)
+			fmt.Println(response.Body)
+			fmt.Println(response.Headers)
+		}
 	}
-	fmt.Println("Email Sent Successfully!")
-
 }
 
 func Filter(vs []string, f func(string) bool) []string {
